@@ -29,6 +29,7 @@ def main():
 # =============================================================================
 #  2: Preprocesamiento
 # - Convertir sex, smoker, region a números con LabelEncoder
+# - Feature Engineering para mejorar predicciones, escalamos todos los valores menos el precio
 # =============================================================================
     categorical_columns = ["sex", "smoker", "region"]
     
@@ -37,8 +38,15 @@ def main():
     for col in categorical_columns:
         X[col] = le.fit_transform(X[col])
     
-    print("\nAfter encoding:")
+    X['age_squared'] = X['age'] ** 2
+    X['bmi_smoker'] = X['bmi'] * X['smoker'] 
+    X['age_smoker'] = X['age'] * X['smoker']
+    X['bmi_squared'] = X['bmi'] ** 2
+    X['age_bmi'] = X['age'] * X['bmi']
+    
+    print("\nAfter encoding and feature engineering:")
     print(X.head())
+    print(f"\nNew X shape: {X.shape}")
 
 
 
@@ -53,14 +61,14 @@ def main():
 
     X_scaled = scaler.fit_transform(X)
 
-    X_test, X_train, y_test, y_train = train_test_split(
+    X_train, X_test, y_train, y_test = train_test_split(
         X_scaled,
         y,
         train_size=0.8,
         random_state=25
     )
 
-    print(f"Train size: {round(len(X_train) / len(X) * 100)}%")
+    print(f"\nTrain size: {round(len(X_train) / len(X) * 100)}%")
     print(f"Test size: {round(len(X_test) / len(X) * 100)}%")
 
     model = LinearRegression()
@@ -75,6 +83,29 @@ def main():
 # - Mostrar predicciones vs reales
 # - Guardar CSV
 # =============================================================================
+    print("RESULTADOS FINALES")
+    
+    # Verificar si cumple con el objetivo
+    expected_loss = 19_000_000
+    print(f"\nLoss (MSE): {mse:,.2f}")
+    print(f"Expected loss: <= {expected_loss:,}")
+    
+    # Mostrar predicciones vs valores reales
+    print("\n--- Predicciones vs Valores Reales (primeros 5) ---")
+    results_df = pd.DataFrame({
+        'Real': y_test.values[:5],
+        'Predicción': y_pred[:5],
+        'Diferencia': np.abs(y_test.values[:5] - y_pred[:5])
+    })
+    print(results_df.to_string(index=False))
+    
+    # Guardar resultados en CSV
+    full_results = pd.DataFrame({
+        'Real': y_test.values,
+        'Predicción': y_pred,
+        'Diferencia': np.abs(y_test.values - y_pred)
+    })
+    full_results.to_csv("resultados_predicciones.csv", index=False)
 
 
 if __name__ == "__main__":
