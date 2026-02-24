@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 # Cargar datos
 def main():
@@ -44,11 +44,30 @@ def main():
 
 # =============================================================================
 #  3: Entrenamiento
+# - scaler
 # - train_test_split
 # - Crear LinearRegression y entrenar
 # - Predecir y calcular MSE
 # =============================================================================
+    scaler = StandardScaler()
 
+    X_scaled = scaler.fit_transform(X)
+
+    X_test, X_train, y_test, y_train = train_test_split(
+        X_scaled,
+        y,
+        train_size=0.8,
+        random_state=25
+    )
+
+    print(f"Train size: {round(len(X_train) / len(X) * 100)}%")
+    print(f"Test size: {round(len(X_test) / len(X) * 100)}%")
+
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    mse = np.mean((y_test - y_pred) ** 2)
+    print(f"\nMean Squared Error: {mse:.2f}")
 
 # =============================================================================
 #  4: Resultados
