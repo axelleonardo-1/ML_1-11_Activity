@@ -30,6 +30,16 @@ def main():
 #  2: Preprocesamiento
 # - Convertir sex, smoker, region a números con LabelEncoder
 # =============================================================================
+    categorical_columns = ["sex", "smoker", "region"]
+    
+    le = LabelEncoder()
+    
+    for col in categorical_columns:
+        X[col] = le.fit_transform(X[col])
+    
+    print("\nAfter encoding:")
+    print(X.head())
+
 
 
 # =============================================================================
